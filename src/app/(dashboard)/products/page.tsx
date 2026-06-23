@@ -244,7 +244,7 @@ export default function ProductsPage() {
                 <Statistic
                   title={<Text type="secondary" style={{ fontSize: 12 }}>{card.title}</Text>}
                   value={card.value}
-                  valueStyle={{ fontSize: 24, fontWeight: 700 }}
+                  styles={{ content: { fontSize: 24, fontWeight: 700 } }}
                 />
               </div>
             </Card>

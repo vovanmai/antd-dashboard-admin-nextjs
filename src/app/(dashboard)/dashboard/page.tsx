@@ -213,11 +213,11 @@ export default function DashboardPage() {
                       prefix={stat.prefix}
                       suffix={stat.suffix}
                       precision={stat.suffix === "%" ? 1 : 0}
-                      valueStyle={{
+                      styles={{ content: {
                         fontSize: isMobile ? 18 : 24,
                         fontWeight: 700,
                         color: "#1a1a2e",
-                      }}
+                      } }}
                       formatter={
                         stat.prefix === "₫"
                           ? isMobile

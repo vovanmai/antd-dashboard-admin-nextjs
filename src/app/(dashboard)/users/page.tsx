@@ -227,7 +227,7 @@ export default function UsersPage() {
                   <Statistic
                     title={<Text type="secondary" style={{ fontSize: 12 }}>{card.title}</Text>}
                     value={card.value}
-                    valueStyle={{ fontSize: 24, fontWeight: 700, color: "#1a1a2e" }}
+                    styles={{ content: { fontSize: 24, fontWeight: 700, color: "#1a1a2e" } }}
                   />
                 </div>
               </div>

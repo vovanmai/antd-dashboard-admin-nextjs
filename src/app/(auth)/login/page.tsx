@@ -1,22 +1,40 @@
 "use client";
 
-import { Card, Form, Input, Button, Checkbox, Divider, Typography, Space } from "antd";
+import { Card, Form, Input, Button, Checkbox, Divider, Typography, Space, Alert } from "antd";
 import {
   LockOutlined,
   MailOutlined,
   GithubOutlined,
   GoogleOutlined,
 } from "@ant-design/icons";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAppDispatch } from "@/lib/store/hooks";
+import { setCurrentUser } from "@/lib/store/features/auth/authSlice";
+import { login } from "@/lib/api/auth";
 
 const { Text, Title } = Typography;
 
 export default function LoginPage() {
   const router = useRouter();
   const [form] = Form.useForm();
+  const dispatch = useAppDispatch();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = () => {
-    router.push("/dashboard");
+  const handleLogin = async (values: { email: string; password: string }) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const { user, token } = await login(values);
+      localStorage.setItem('access_token', token);
+      dispatch(setCurrentUser(user));
+      router.push("/dashboard");
+    } catch (err: any) {
+      setError(err?.data?.message ?? err?.message ?? 'Đăng nhập thất bại');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -92,6 +110,16 @@ export default function LoginPage() {
           <Text type="secondary">Đăng nhập vào AdminPro Dashboard</Text>
         </div>
 
+        {error && (
+          <Alert
+            title={error}
+            type="error"
+            showIcon
+            closable={{ onClose: () => setError(null) }}
+            style={{ marginBottom: 20, borderRadius: 10 }}
+          />
+        )}
+
         <Form form={form} layout="vertical" onFinish={handleLogin}>
           <Form.Item
             label="Email"
@@ -134,6 +162,7 @@ export default function LoginPage() {
               htmlType="submit"
               size="large"
               block
+              loading={loading}
               style={{
                 background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
                 border: "none",
