@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/lib/store/hooks";
 import { setCurrentUser } from "@/lib/store/features/auth/authSlice";
 import { login } from "@/lib/api/auth";
+import { setAuthToken } from "@/lib/api/axiosClient";
 
 const { Text, Title } = Typography;
 
@@ -26,8 +27,8 @@ export default function LoginPage() {
     try {
       setLoading(true);
       setError(null);
-      const { user, token } = await login(values);
-      localStorage.setItem('access_token', token);
+      const { user, access_token } = await login(values);
+      setAuthToken(access_token);
       dispatch(setCurrentUser(user));
       router.push("/dashboard");
     } catch (err: any) {
@@ -107,7 +108,7 @@ export default function LoginPage() {
             A
           </div>
           <Title level={3} style={{ margin: 0 }}>Chào mừng trở lại!</Title>
-          <Text type="secondary">Đăng nhập vào AdminPro Dashboard</Text>
+          <Text type="secondary">Đăng nhập vào Management Site</Text>
         </div>
 
         {error && (

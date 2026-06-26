@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Card,
   Table,
@@ -15,8 +15,8 @@ import {
   Col,
   Popconfirm,
   Tooltip,
-  Badge,
   Statistic,
+  message,
 } from "antd";
 import {
   SearchOutlined,
@@ -24,46 +24,69 @@ import {
   EditOutlined,
   DeleteOutlined,
   ExportOutlined,
-  FilterOutlined,
   UserOutlined,
   TeamOutlined,
-  CheckCircleOutlined,
-  CloseCircleOutlined,
 } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
-import { users } from "@/lib/mockData";
+import { usersApi, type User } from "@/lib/api/users";
 
 const { Text, Title } = Typography;
 
-type User = (typeof users)[0];
-
 const roleColors: Record<string, string> = {
   Admin: "purple",
-  Manager: "blue",
-  Editor: "cyan",
-  Viewer: "default",
-  User: "green",
+  "Sub Admin": "blue",
 };
 
 export default function UsersPage() {
+  const [searchInput, setSearchInput] = useState("");
+  const [roleInput, setRoleInput] = useState<string | undefined>(undefined);
   const [search, setSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [roleFilter, setRoleFilter] = useState<string | undefined>(undefined);
   const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
+  const [data, setData] = useState<User[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(15);
+  const [loading, setLoading] = useState(false);
 
-  const filtered = users.filter((u) => {
-    const matchSearch =
-      !search ||
-      u.name.toLowerCase().includes(search.toLowerCase()) ||
-      u.email.toLowerCase().includes(search.toLowerCase()) ||
-      u.id.toLowerCase().includes(search.toLowerCase());
-    const matchRole = !roleFilter || u.role === roleFilter;
-    const matchStatus = !statusFilter || u.status === statusFilter;
-    return matchSearch && matchRole && matchStatus;
-  });
+  const handleSearch = () => {
+    setSearch(searchInput);
+    setRoleFilter(roleInput);
+    setPage(1);
+  };
 
-  const activeCount = users.filter((u) => u.status === "active").length;
-  const adminCount = users.filter((u) => u.role === "Admin").length;
+  const handleReset = () => {
+    setSearchInput("");
+    setRoleInput(undefined);
+    setSearch("");
+    setRoleFilter(undefined);
+    setPage(1);
+  };
+
+  const fetchUsers = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await usersApi.getUsers({
+        page,
+        per_page: perPage,
+        search: search || undefined,
+        role: roleFilter,
+      });
+      setData(res.data);
+      setTotal(res.meta.total);
+    } catch {
+      message.error("Không thể tải danh sách người dùng");
+    } finally {
+      setLoading(false);
+    }
+  }, [page, perPage, search, roleFilter]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  const adminCount = data.filter((u) => u.role === "Admin").length;
+  const subAdminCount = data.filter((u) => u.role === "Sub Admin").length;
 
   const columns: ColumnsType<User> = [
     {
@@ -74,12 +97,12 @@ export default function UsersPage() {
           <Avatar
             size={38}
             style={{
-              background: `hsl(${record.id.charCodeAt(4) * 20 % 360}, 60%, 55%)`,
+              background: `hsl(${(record.id * 37) % 360}, 60%, 55%)`,
               fontWeight: 600,
               fontSize: 13,
             }}
           >
-            {record.avatar}
+            {record.name.charAt(0).toUpperCase()}
           </Avatar>
           <div>
             <Text strong style={{ fontSize: 13 }}>{record.name}</Text>
@@ -94,7 +117,7 @@ export default function UsersPage() {
       title: "ID",
       dataIndex: "id",
       key: "id",
-      render: (id) => <Text code style={{ fontSize: 12 }}>{id}</Text>,
+      render: (id) => <Text code style={{ fontSize: 12 }}>#{id}</Text>,
     },
     {
       title: "Vai trò",
@@ -105,52 +128,6 @@ export default function UsersPage() {
           {role}
         </Tag>
       ),
-      filters: ["Admin", "Manager", "Editor", "Viewer", "User"].map((r) => ({
-        text: r,
-        value: r,
-      })),
-      onFilter: (value, record) => record.role === value,
-    },
-    {
-      title: "Trạng thái",
-      dataIndex: "status",
-      key: "status",
-      render: (status) =>
-        status === "active" ? (
-          <Badge status="success" text={<Text style={{ color: "#10b981", fontSize: 13 }}>Hoạt động</Text>} />
-        ) : (
-          <Badge status="default" text={<Text type="secondary" style={{ fontSize: 13 }}>Không hoạt động</Text>} />
-        ),
-      filters: [
-        { text: "Hoạt động", value: "active" },
-        { text: "Không hoạt động", value: "inactive" },
-      ],
-      onFilter: (value, record) => record.status === value,
-    },
-    {
-      title: "Ngày tham gia",
-      dataIndex: "joinDate",
-      key: "joinDate",
-      render: (d) => <Text type="secondary" style={{ fontSize: 12 }}>{d}</Text>,
-    },
-    {
-      title: "Đơn hàng",
-      dataIndex: "orders",
-      key: "orders",
-      align: "center",
-      render: (v) => <Text strong>{v}</Text>,
-      sorter: (a, b) => a.orders - b.orders,
-    },
-    {
-      title: "Chi tiêu",
-      dataIndex: "spent",
-      key: "spent",
-      render: (v) => (
-        <Text strong style={{ color: "#6366f1" }}>
-          {v.toLocaleString("vi-VN")}₫
-        </Text>
-      ),
-      sorter: (a, b) => a.spent - b.spent,
     },
     {
       title: "Hành động",
@@ -173,74 +150,47 @@ export default function UsersPage() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-      {/* Summary cards */}
-      <Row gutter={[16, 16]}>
-        {[
-          {
-            title: "Tổng người dùng",
-            value: users.length,
-            icon: <TeamOutlined />,
-            color: "#6366f1",
-            bg: "#eef2ff",
-          },
-          {
-            title: "Đang hoạt động",
-            value: activeCount,
-            icon: <CheckCircleOutlined />,
-            color: "#10b981",
-            bg: "#ecfdf5",
-          },
-          {
-            title: "Không hoạt động",
-            value: users.length - activeCount,
-            icon: <CloseCircleOutlined />,
-            color: "#ef4444",
-            bg: "#fef2f2",
-          },
-          {
-            title: "Quản trị viên",
-            value: adminCount,
-            icon: <UserOutlined />,
-            color: "#8b5cf6",
-            bg: "#f5f3ff",
-          },
-        ].map((card) => (
-          <Col xs={12} lg={6} key={card.title}>
-            <Card style={{ borderRadius: 12, border: "none", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                <div
-                  style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: 10,
-                    background: card.bg,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: 20,
-                    color: card.color,
-                  }}
-                >
-                  {card.icon}
-                </div>
-                <div>
-                  <Statistic
-                    title={<Text type="secondary" style={{ fontSize: 12 }}>{card.title}</Text>}
-                    value={card.value}
-                    styles={{ content: { fontSize: 24, fontWeight: 700, color: "#1a1a2e" } }}
-                  />
-                </div>
-              </div>
-            </Card>
+      <Card style={{ borderRadius: 12, border: "none", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
+        <Title level={5} style={{ margin: "0 0 16px" }}>Tìm kiếm</Title>
+        <Row gutter={[12, 12]} align="middle">
+          <Col xs={24} sm={12} md={8}>
+            <Input
+              placeholder="Tìm kiếm tên, email..."
+              prefix={<SearchOutlined style={{ color: "#bbb" }} />}
+              variant="filled"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onPressEnter={handleSearch}
+              allowClear
+            />
           </Col>
-        ))}
-      </Row>
+          <Col xs={24} sm={8} md={6}>
+            <Select
+              placeholder="Vai trò"
+              allowClear
+              style={{ width: "100%" }}
+              options={["Admin", "Sub Admin"].map((r) => ({ label: r, value: r }))}
+              onChange={setRoleInput}
+              value={roleInput}
+            />
+          </Col>
+          <Col>
+            <Space>
+              <Button
+                type="primary"
+                icon={<SearchOutlined />}
+                onClick={handleSearch}
+                style={{ background: "#6366f1", borderColor: "#6366f1" }}
+              >
+                Tìm kiếm
+              </Button>
+              <Button onClick={handleReset}>Đặt lại</Button>
+            </Space>
+          </Col>
+        </Row>
+      </Card>
 
-      {/* Main table */}
-      <Card
-        style={{ borderRadius: 12, border: "none", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}
-      >
-        {/* Toolbar */}
+      <Card style={{ borderRadius: 12, border: "none", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
         <div
           style={{
             display: "flex",
@@ -253,36 +203,6 @@ export default function UsersPage() {
         >
           <Title level={5} style={{ margin: 0 }}>Danh sách người dùng</Title>
           <Space wrap>
-            <Input
-              placeholder="Tìm kiếm tên, email, ID..."
-              prefix={<SearchOutlined style={{ color: "#bbb" }} />}
-              style={{ width: 240 }}
-              variant="filled"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-            <Select
-              placeholder="Vai trò"
-              allowClear
-              style={{ width: 130 }}
-              options={["Admin", "Manager", "Editor", "Viewer", "User"].map((r) => ({
-                label: r,
-                value: r,
-              }))}
-              onChange={setRoleFilter}
-              value={roleFilter}
-            />
-            <Select
-              placeholder="Trạng thái"
-              allowClear
-              style={{ width: 150 }}
-              options={[
-                { label: "Hoạt động", value: "active" },
-                { label: "Không hoạt động", value: "inactive" },
-              ]}
-              onChange={setStatusFilter}
-              value={statusFilter}
-            />
             <Button icon={<ExportOutlined />}>Xuất Excel</Button>
             <Button type="primary" icon={<PlusOutlined />} style={{ background: "#6366f1", borderColor: "#6366f1" }}>
               Thêm người dùng
@@ -307,14 +227,23 @@ export default function UsersPage() {
           </div>
         )}
 
-        <Table
-          dataSource={filtered}
+        <Table<User>
+          dataSource={data}
+          rowKey="id"
           columns={columns}
+          loading={loading}
           pagination={{
-            pageSize: 10,
+            current: page,
+            pageSize: perPage,
+            total,
             showSizeChanger: true,
-            showTotal: (total) => `Tổng ${total} người dùng`,
+            pageSizeOptions: ["15", "30", "50"],
+            showTotal: (t) => `Tổng ${t} người dùng`,
             style: { marginTop: 16 },
+            onChange: (p, ps) => {
+              setPage(p);
+              setPerPage(ps);
+            },
           }}
           rowSelection={{
             type: "checkbox",
@@ -322,7 +251,7 @@ export default function UsersPage() {
             onChange: setSelectedKeys,
           }}
           size="middle"
-          scroll={{ x: 900 }}
+          scroll={{ x: 700 }}
         />
       </Card>
     </div>

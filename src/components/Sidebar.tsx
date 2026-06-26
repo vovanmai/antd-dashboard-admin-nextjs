@@ -126,7 +126,7 @@ function SidebarContent({
                 lineHeight: 1.2,
               }}
             >
-              AdminPro
+              Management
             </Text>
             <Text style={{ color: "rgba(255,255,255,0.45)", fontSize: 11 }}>
               Dashboard v2.0
@@ -284,7 +284,7 @@ export default function Sidebar({
               A
             </div>
             <Text strong style={{ color: "white", fontSize: 15 }}>
-              AdminPro
+              Management
             </Text>
           </div>
         }

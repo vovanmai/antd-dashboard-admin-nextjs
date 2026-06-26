@@ -1,28 +1,33 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
-export const getAccessToken = () => {
-  if (localStorage.getItem('access_token')) {
-    return `Bearer ${localStorage.getItem('access_token')}`
-  }
-  return null
-};
+
 const axiosClient: AxiosInstance = axios.create({
-  baseURL: process.env.API_BASE_URL,
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-axiosClient.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    const authorization = getAccessToken();
-    if (authorization) {
-      config.headers.Authorization = authorization;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
+export const setAuthToken = (token: string | null) => {
+  if (token) {
+    axiosClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    localStorage.setItem('access_token', token);
+  } else {
+    delete axiosClient.defaults.headers.common['Authorization'];
+    localStorage.removeItem('access_token');
   }
+};
+
+// Restore token on page refresh
+if (typeof window !== 'undefined') {
+  const token = localStorage.getItem('access_token');
+  if (token) {
+    axiosClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  }
+}
+
+axiosClient.interceptors.request.use(
+  (config: InternalAxiosRequestConfig) => config,
+  (error) => Promise.reject(error),
 );
 
 axiosClient.interceptors.response.use(

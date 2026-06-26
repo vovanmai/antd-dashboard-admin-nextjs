@@ -11,8 +11,8 @@ export interface AuthUser {
   email: string;
 }
 
-export function login(data: LoginPayload): Promise<{ user: AuthUser; token: string }> {
-  return api.post('login', data) as unknown as Promise<{ user: AuthUser; token: string }>;
+export function login(data: LoginPayload): Promise<{ user: AuthUser; access_token: string }> {
+  return api.post('login', data) as unknown as Promise<{ user: AuthUser; access_token: string }>;
 }
 
 export function getProfile(): Promise<AuthUser> {
