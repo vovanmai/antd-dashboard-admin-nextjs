@@ -5,6 +5,8 @@ export interface User {
   name: string;
   email: string;
   role: string;
+  role_id: number;
+  can_edit: boolean;
   can_delete: boolean;
 }
 
@@ -35,12 +37,24 @@ export interface CreateUserPayload {
   role_id: number;
 }
 
+export interface UpdateUserPayload {
+  name: string;
+  email: string;
+  role_id: number;
+  password?: string;
+  password_confirmation?: string;
+}
+
 export function getUsers(params?: GetUsersParams): Promise<UsersResponse> {
   return api.get('users', { params }) as unknown as Promise<UsersResponse>;
 }
 
 export function deleteUser(id: number): Promise<void> {
   return api.delete(`users/${id}`) as unknown as Promise<void>;
+}
+
+export function getUser(id: number): Promise<User> {
+  return api.get(`users/${id}`) as unknown as Promise<User>;
 }
 
 export function createUser(payload: CreateUserPayload): Promise<void> {
@@ -53,4 +67,17 @@ export function createUser(payload: CreateUserPayload): Promise<void> {
   return api.post('users', form) as unknown as Promise<void>;
 }
 
-export const usersApi = { getUsers, deleteUser, createUser };
+export function updateUser(id: number, payload: UpdateUserPayload): Promise<void> {
+  const form = new FormData();
+  form.append('_method', 'PUT');
+  form.append('name', payload.name);
+  form.append('email', payload.email);
+  form.append('role_id', String(payload.role_id));
+  if (payload.password) {
+    form.append('password', payload.password);
+    form.append('password_confirmation', payload.password_confirmation ?? '');
+  }
+  return api.post(`users/${id}`, form) as unknown as Promise<void>;
+}
+
+export const usersApi = { getUsers, getUser, createUser, updateUser, deleteUser };

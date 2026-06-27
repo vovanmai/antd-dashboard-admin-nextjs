@@ -28,9 +28,11 @@ import {
   ExclamationCircleFilled,
 } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
+import type { TooltipProps } from "antd";
 import { usersApi, type User } from "@/lib/api/users";
 import { rolesApi, type Role } from "@/lib/api/roles";
 import { usePermissions } from "@/hooks/usePermission";
+import { PERM_USER_CREATE, PERM_USER_EDIT, PERM_USER_DELETE } from "@/constants/permissions";
 
 const { Text, Title } = Typography;
 
@@ -38,6 +40,10 @@ const roleColors: Record<string, string> = {
   Admin: "purple",
   "Sub Admin": "blue",
 };
+
+const USER_PERMISSIONS = [PERM_USER_CREATE, PERM_USER_EDIT, PERM_USER_DELETE] as const;
+
+const NO_PERM_TOOLTIP: TooltipProps = { title: "Bạn không có quyền thực hiện" };
 
 function UsersPageInner() {
   const router = useRouter();
@@ -49,7 +55,7 @@ function UsersPageInner() {
   const page = Number(searchParams.get("page") ?? "1");
   const perPage = Number(searchParams.get("per_page") ?? "15");
 
-  const perms = usePermissions(["user.create", "user.edit", "user.delete"]);
+  const perms = usePermissions(USER_PERMISSIONS);
 
   const [form] = Form.useForm();
   const [fetchTrigger, setFetchTrigger] = useState(0);
@@ -157,32 +163,42 @@ function UsersPageInner() {
       align: "center",
       render: (_, record) => (
         <Space size={4}>
-          <Tooltip title={perms["user.edit"] ? "Chỉnh sửa" : "Không có quyền chỉnh sửa"}>
-            <Button type="text" icon={<EditOutlined />} size="small" style={{ color: "#6366f1" }} disabled={!perms["user.edit"]} />
+          <Tooltip {...(!record.can_edit ? NO_PERM_TOOLTIP : {})}>
+            <span>
+              <Button
+                type="text"
+                shape="circle"
+                icon={<EditOutlined />}
+                disabled={!record.can_edit}
+                onClick={() => router.push(`/users/${record.id}/edit`)}
+              />
+            </span>
           </Tooltip>
-          <Tooltip title={!perms["user.delete"] || !record.can_delete ? "Không có quyền xoá" : "Xoá"}>
-            <Button
-              type="text"
-              icon={<DeleteOutlined />}
-              size="small"
-              danger
-              disabled={!perms["user.delete"] || !record.can_delete}
-              onClick={() =>
-                Modal.confirm({
-                  title: "Bạn có chắc muốn xoá người dùng này?",
-                  icon: <ExclamationCircleFilled />,
-                  content: `${record.name} (${record.email})`,
-                  okText: "Xoá",
-                  okType: "danger",
-                  cancelText: "Huỷ",
-                  onOk: () =>
-                    usersApi.deleteUser(record.id).then(() => {
-                      message.success("Xoá người dùng thành công");
-                      setFetchTrigger((t) => t + 1);
-                    }),
-                })
-              }
-            />
+          <Tooltip {...(!perms[PERM_USER_DELETE] || !record.can_delete ? NO_PERM_TOOLTIP : {})}>
+            <span>
+              <Button
+                type="text"
+                icon={<DeleteOutlined />}
+                danger
+                shape="circle"
+                disabled={!record.can_delete}
+                onClick={() =>
+                  Modal.confirm({
+                    title: "Bạn có chắc muốn xoá người dùng này?",
+                    icon: <ExclamationCircleFilled />,
+                    content: `${record.name} (${record.email})`,
+                    okText: "Xoá",
+                    okType: "danger",
+                    cancelText: "Huỷ",
+                    onOk: () =>
+                      usersApi.deleteUser(record.id).then(() => {
+                        message.success("Xoá người dùng thành công");
+                        setFetchTrigger((t) => t + 1);
+                      }),
+                  })
+                }
+              />
+            </span>
           </Tooltip>
         </Space>
       ),
@@ -245,15 +261,18 @@ function UsersPageInner() {
           <Title level={5} style={{ margin: 0 }}>Danh sách người dùng</Title>
           <Space wrap>
             <Button icon={<ExportOutlined />}>Xuất Excel</Button>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              style={{ background: "#6366f1", borderColor: "#6366f1" }}
-              disabled={!perms["user.create"]}
-              onClick={() => router.push("/users/create")}
-            >
-              Thêm người dùng
-            </Button>
+            <Tooltip {...(!perms[PERM_USER_CREATE] ? NO_PERM_TOOLTIP : {})}>
+              <span>
+                <Button
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  disabled={!perms[PERM_USER_CREATE]}
+                  onClick={() => router.push("/users/create")}
+                >
+                  Thêm người dùng
+                </Button>
+              </span>
+            </Tooltip>
           </Space>
         </div>
 

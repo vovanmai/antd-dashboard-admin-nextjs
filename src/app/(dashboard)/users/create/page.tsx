@@ -25,7 +25,7 @@ export default function CreateUserPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    rolesApi.getRoles().then(setRoles).catch(() => {});
+    rolesApi.getRoles({less_than: true}).then(setRoles).catch(() => {});
   }, []);
 
   const handleSubmit = async (values: {
@@ -147,11 +147,11 @@ export default function CreateUserPage() {
                 htmlType="submit"
                 icon={<SaveOutlined />}
                 loading={loading}
-                style={{ background: "#6366f1", borderColor: "#6366f1" }}
+                // style={{ background: "#6366f1", borderColor: "#6366f1" }}
               >
                 Lưu
               </Button>
-              <Button onClick={() => router.push("/users")}>Huỷ</Button>
+              <Button onClick={() => form.resetFields()}>Xoá</Button>
             </Space>
           </Form.Item>
         </Form>

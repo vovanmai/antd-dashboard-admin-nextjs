@@ -6,8 +6,8 @@ export interface Role {
   display_name: string;
 }
 
-export function getRoles(): Promise<Role[]> {
-  return api.get('roles') as unknown as Promise<Role[]>;
+export function getRoles(params: any = {}): Promise<Role[]> {
+  return api.get('roles', {params: params}) as unknown as Promise<Role[]>;
 }
 
 export const rolesApi = { getRoles };

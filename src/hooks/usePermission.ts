@@ -7,7 +7,7 @@ export function usePermission(permission: string): boolean {
   return permissions.includes(permission);
 }
 
-export function usePermissions(permissions: string[]): Record<string, boolean> {
+export function usePermissions(permissions: readonly string[]): Record<string, boolean> {
   const currentUser = useAppSelector(selectCurrentUser);
   const userPermissions: string[] = currentUser?.permissions ?? [];
   return Object.fromEntries(
