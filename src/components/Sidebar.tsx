@@ -15,6 +15,8 @@ import {
 } from "@ant-design/icons";
 import { usePathname, useRouter } from "next/navigation";
 import type { MenuProps } from "antd";
+import { useAppSelector } from "@/lib/store/hooks";
+import { selectCurrentUser } from "@/lib/store/features/auth/authSlice";
 
 const { Sider } = Layout;
 const { Text } = Typography;
@@ -76,12 +78,16 @@ function SidebarContent({
   pathname,
   openKeys,
   onOpenChange,
+  userName,
+  userEmail,
 }: {
   collapsed: boolean;
   onMenuClick: (key: string) => void;
   pathname: string;
   openKeys: string[];
   onOpenChange: (keys: string[]) => void;
+  userName: string;
+  userEmail: string;
 }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
@@ -175,7 +181,7 @@ function SidebarContent({
             fontWeight: 600,
           }}
         >
-          AD
+          {userName.charAt(0).toUpperCase()}
         </Avatar>
         {!collapsed && (
           <div style={{ flex: 1, overflow: "hidden" }}>
@@ -190,7 +196,7 @@ function SidebarContent({
                 textOverflow: "ellipsis",
               }}
             >
-              Admin User
+              {userName}
             </Text>
             <Text
               style={{
@@ -202,7 +208,7 @@ function SidebarContent({
                 textOverflow: "ellipsis",
               }}
             >
-              admin@company.com
+              {userEmail}
             </Text>
           </div>
         )}
@@ -225,6 +231,9 @@ export default function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const currentUser = useAppSelector(selectCurrentUser);
+  const userName = currentUser?.name ?? "";
+  const userEmail = currentUser?.email ?? "";
 
   const getOpenKeys = () => {
     if (pathname.startsWith("/orders") || pathname.startsWith("/products")) {
@@ -321,7 +330,7 @@ export default function Sidebar({
                 flexShrink: 0,
               }}
             >
-              AD
+              {userName.charAt(0).toUpperCase()}
             </Avatar>
             <div style={{ flex: 1, overflow: "hidden" }}>
               <Text
@@ -335,7 +344,7 @@ export default function Sidebar({
                   whiteSpace: "nowrap",
                 }}
               >
-                Admin User
+                {userName}
               </Text>
               <Text
                 style={{
@@ -347,7 +356,7 @@ export default function Sidebar({
                   whiteSpace: "nowrap",
                 }}
               >
-                admin@company.com
+                {userEmail}
               </Text>
             </div>
             <LogoutOutlined style={{ color: "rgba(255,255,255,0.45)" }} />
@@ -383,6 +392,8 @@ export default function Sidebar({
         pathname={pathname}
         openKeys={openKeys}
         onOpenChange={setOpenKeys}
+        userName={userName}
+        userEmail={userEmail}
       />
     </Sider>
   );

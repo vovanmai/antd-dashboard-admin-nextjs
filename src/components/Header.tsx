@@ -26,6 +26,8 @@ import {
 import type { MenuProps } from "antd";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { useAppSelector } from "@/lib/store/hooks";
+import { selectCurrentUser } from "@/lib/store/features/auth/authSlice";
 
 const { Header: AntHeader } = Layout;
 const { Text } = Typography;
@@ -103,6 +105,9 @@ export default function Header({ collapsed, isMobile, onToggle }: HeaderProps) {
   const pathname = usePathname();
   const title = pageTitles[pathname] || "Dashboard";
   const [searchOpen, setSearchOpen] = useState(false);
+  const currentUser = useAppSelector(selectCurrentUser);
+  const userName = currentUser?.name ?? "";
+  const userEmail = currentUser?.email ?? "";
 
   return (
     <AntHeader
@@ -198,13 +203,12 @@ export default function Header({ collapsed, isMobile, onToggle }: HeaderProps) {
               fontSize: 13,
             }}
           >
-            AD
+            {userName.charAt(0).toUpperCase()}
           </Avatar>
-          {/* Hide text label on mobile */}
           {!isMobile && (
             <div style={{ lineHeight: 1.3 }}>
-              <Text strong style={{ fontSize: 13, display: "block" }}>Admin User</Text>
-              <Text type="secondary" style={{ fontSize: 11 }}>Super Admin</Text>
+              <Text strong style={{ fontSize: 13, display: "block" }}>{userName}</Text>
+              <Text type="secondary" style={{ fontSize: 11 }}>{userEmail}</Text>
             </div>
           )}
         </Space>

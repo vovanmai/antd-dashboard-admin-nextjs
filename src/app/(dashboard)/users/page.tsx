@@ -113,7 +113,7 @@ function UsersPageInner() {
       key: "user",
       render: (_, record) => (
         <Space>
-          <Avatar
+          {/* <Avatar
             size={38}
             style={{
               background: `hsl(${(record.id * 37) % 360}, 60%, 55%)`,
@@ -122,7 +122,7 @@ function UsersPageInner() {
             }}
           >
             {record.name.charAt(0).toUpperCase()}
-          </Avatar>
+          </Avatar> */}
           <div>
             <Text strong style={{ fontSize: 13 }}>{record.name}</Text>
             <br />
@@ -157,12 +157,13 @@ function UsersPageInner() {
           <Tooltip title="Chỉnh sửa">
             <Button type="text" icon={<EditOutlined />} size="small" style={{ color: "#6366f1" }} />
           </Tooltip>
-          <Tooltip title="Xoá">
+          <Tooltip title={record.can_delete ? "Xoá" : "Không có quyền xoá"}>
             <Button
               type="text"
               icon={<DeleteOutlined />}
               size="small"
               danger
+              disabled={!record.can_delete}
               onClick={() =>
                 Modal.confirm({
                   title: "Bạn có chắc muốn xoá người dùng này?",
@@ -241,7 +242,12 @@ function UsersPageInner() {
           <Title level={5} style={{ margin: 0 }}>Danh sách người dùng</Title>
           <Space wrap>
             <Button icon={<ExportOutlined />}>Xuất Excel</Button>
-            <Button type="primary" icon={<PlusOutlined />} style={{ background: "#6366f1", borderColor: "#6366f1" }}>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              style={{ background: "#6366f1", borderColor: "#6366f1" }}
+              onClick={() => router.push("/users/create")}
+            >
               Thêm người dùng
             </Button>
           </Space>
