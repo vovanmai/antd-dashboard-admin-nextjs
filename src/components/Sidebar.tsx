@@ -15,8 +15,10 @@ import {
 } from "@ant-design/icons";
 import { usePathname, useRouter } from "next/navigation";
 import type { MenuProps } from "antd";
-import { useAppSelector } from "@/lib/store/hooks";
-import { selectCurrentUser } from "@/lib/store/features/auth/authSlice";
+import { useAppSelector, useAppDispatch } from "@/lib/store/hooks";
+import { selectCurrentUser, setCurrentUser } from "@/lib/store/features/auth/authSlice";
+import { authApi } from "@/lib/api/auth";
+import { setAuthToken } from "@/lib/api/axiosClient";
 
 const { Sider } = Layout;
 const { Text } = Typography;
@@ -80,6 +82,7 @@ function SidebarContent({
   onOpenChange,
   userName,
   userEmail,
+  onLogout,
 }: {
   collapsed: boolean;
   onMenuClick: (key: string) => void;
@@ -88,6 +91,7 @@ function SidebarContent({
   onOpenChange: (keys: string[]) => void;
   userName: string;
   userEmail: string;
+  onLogout: () => void;
 }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
@@ -214,7 +218,8 @@ function SidebarContent({
         )}
         {!collapsed && (
           <LogoutOutlined
-            style={{ color: "rgba(255,255,255,0.45)", fontSize: 14 }}
+            style={{ color: "rgba(255,255,255,0.45)", fontSize: 14, cursor: "pointer" }}
+            onClick={onLogout}
           />
         )}
       </div>
@@ -231,9 +236,20 @@ export default function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const currentUser = useAppSelector(selectCurrentUser);
   const userName = currentUser?.name ?? "";
   const userEmail = currentUser?.email ?? "";
+
+  const handleLogout = async () => {
+    try {
+      await authApi.logout();
+    } finally {
+      setAuthToken(null);
+      dispatch(setCurrentUser(null));
+      router.push("/login");
+    }
+  };
 
   const getOpenKeys = () => {
     if (pathname.startsWith("/orders") || pathname.startsWith("/products")) {
@@ -359,7 +375,10 @@ export default function Sidebar({
                 {userEmail}
               </Text>
             </div>
-            <LogoutOutlined style={{ color: "rgba(255,255,255,0.45)" }} />
+            <LogoutOutlined
+              style={{ color: "rgba(255,255,255,0.45)", cursor: "pointer" }}
+              onClick={handleLogout}
+            />
           </div>
         </div>
       </Drawer>
@@ -394,6 +413,7 @@ export default function Sidebar({
         onOpenChange={setOpenKeys}
         userName={userName}
         userEmail={userEmail}
+        onLogout={handleLogout}
       />
     </Sider>
   );

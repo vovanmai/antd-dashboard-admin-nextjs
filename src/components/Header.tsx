@@ -24,10 +24,12 @@ import {
   CloseOutlined,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { useAppSelector } from "@/lib/store/hooks";
-import { selectCurrentUser } from "@/lib/store/features/auth/authSlice";
+import { useAppSelector, useAppDispatch } from "@/lib/store/hooks";
+import { selectCurrentUser, setCurrentUser } from "@/lib/store/features/auth/authSlice";
+import { authApi } from "@/lib/api/auth";
+import { setAuthToken } from "@/lib/api/axiosClient";
 
 const { Header: AntHeader } = Layout;
 const { Text } = Typography;
@@ -103,11 +105,25 @@ interface HeaderProps {
 
 export default function Header({ collapsed, isMobile, onToggle }: HeaderProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const dispatch = useAppDispatch();
   const title = pageTitles[pathname] || "Dashboard";
   const [searchOpen, setSearchOpen] = useState(false);
   const currentUser = useAppSelector(selectCurrentUser);
   const userName = currentUser?.name ?? "";
   const userRole = currentUser?.role_display_name ?? "";
+
+  const handleMenuClick: MenuProps["onClick"] = async ({ key }) => {
+    if (key === "logout") {
+      try {
+        await authApi.logout();
+      } finally {
+        setAuthToken(null);
+        dispatch(setCurrentUser(null));
+        router.push("/login");
+      }
+    }
+  };
 
   return (
     <AntHeader
@@ -190,7 +206,7 @@ export default function Header({ collapsed, isMobile, onToggle }: HeaderProps) {
 
       {/* User avatar + name */}
       <Dropdown
-        menu={{ items: userMenuItems }}
+        menu={{ items: userMenuItems, onClick: handleMenuClick }}
         trigger={["click"]}
         placement="bottomRight"
       >

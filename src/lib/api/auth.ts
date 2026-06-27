@@ -11,14 +11,27 @@ export interface AuthUser {
   email: string;
   role_name: string;
   role_display_name: string;
+  permissions: string[];
 }
 
-export function login(data: LoginPayload): Promise<{ user: AuthUser; access_token: string }> {
-  return api.post('login', data) as unknown as Promise<{ user: AuthUser; access_token: string }>;
+interface LoginRawResponse {
+  user: Omit<AuthUser, 'permissions'> & { permissions?: string[] };
+  access_token: string;
+  permissions?: string[];
 }
 
-export function getProfile(): Promise<AuthUser> {
-  return api.get('me') as unknown as Promise<AuthUser>;
+export async function login(data: LoginPayload): Promise<{ user: AuthUser; access_token: string }> {
+  const res = await (api.post('login', data) as unknown as Promise<LoginRawResponse>);
+  const user: AuthUser = {
+    ...res.user,
+    permissions: res.user.permissions ?? res.permissions ?? [],
+  };
+  return { user, access_token: res.access_token };
+}
+
+export async function getProfile(): Promise<AuthUser> {
+  const res = await (api.get('me') as unknown as Promise<AuthUser & { permissions?: string[] }>);
+  return { ...res, permissions: res.permissions ?? [] };
 }
 
 export function logout(): Promise<void> {

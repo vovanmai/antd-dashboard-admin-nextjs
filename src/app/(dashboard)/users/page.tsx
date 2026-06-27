@@ -30,6 +30,7 @@ import {
 import type { ColumnsType } from "antd/es/table";
 import { usersApi, type User } from "@/lib/api/users";
 import { rolesApi, type Role } from "@/lib/api/roles";
+import { usePermissions } from "@/hooks/usePermission";
 
 const { Text, Title } = Typography;
 
@@ -47,6 +48,8 @@ function UsersPageInner() {
   const roleFilter = searchParams.get("role_id") ?? undefined;
   const page = Number(searchParams.get("page") ?? "1");
   const perPage = Number(searchParams.get("per_page") ?? "15");
+
+  const perms = usePermissions(["user.create", "user.edit", "user.delete"]);
 
   const [form] = Form.useForm();
   const [fetchTrigger, setFetchTrigger] = useState(0);
@@ -154,16 +157,16 @@ function UsersPageInner() {
       align: "center",
       render: (_, record) => (
         <Space size={4}>
-          <Tooltip title="Chỉnh sửa">
-            <Button type="text" icon={<EditOutlined />} size="small" style={{ color: "#6366f1" }} />
+          <Tooltip title={perms["user.edit"] ? "Chỉnh sửa" : "Không có quyền chỉnh sửa"}>
+            <Button type="text" icon={<EditOutlined />} size="small" style={{ color: "#6366f1" }} disabled={!perms["user.edit"]} />
           </Tooltip>
-          <Tooltip title={record.can_delete ? "Xoá" : "Không có quyền xoá"}>
+          <Tooltip title={!perms["user.delete"] || !record.can_delete ? "Không có quyền xoá" : "Xoá"}>
             <Button
               type="text"
               icon={<DeleteOutlined />}
               size="small"
               danger
-              disabled={!record.can_delete}
+              disabled={!perms["user.delete"] || !record.can_delete}
               onClick={() =>
                 Modal.confirm({
                   title: "Bạn có chắc muốn xoá người dùng này?",
@@ -246,6 +249,7 @@ function UsersPageInner() {
               type="primary"
               icon={<PlusOutlined />}
               style={{ background: "#6366f1", borderColor: "#6366f1" }}
+              disabled={!perms["user.create"]}
               onClick={() => router.push("/users/create")}
             >
               Thêm người dùng
