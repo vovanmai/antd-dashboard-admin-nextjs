@@ -107,7 +107,7 @@ export default function Header({ collapsed, isMobile, onToggle }: HeaderProps) {
   const [searchOpen, setSearchOpen] = useState(false);
   const currentUser = useAppSelector(selectCurrentUser);
   const userName = currentUser?.name ?? "";
-  const userEmail = currentUser?.email ?? "";
+  const userRole = currentUser?.role_display_name ?? "";
 
   return (
     <AntHeader
@@ -208,7 +208,7 @@ export default function Header({ collapsed, isMobile, onToggle }: HeaderProps) {
           {!isMobile && (
             <div style={{ lineHeight: 1.3 }}>
               <Text strong style={{ fontSize: 13, display: "block" }}>{userName}</Text>
-              <Text type="secondary" style={{ fontSize: 11 }}>{userEmail}</Text>
+              <Text type="secondary" style={{ fontSize: 11 }}>{userRole}</Text>
             </div>
           )}
         </Space>

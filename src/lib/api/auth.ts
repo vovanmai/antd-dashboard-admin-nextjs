@@ -9,6 +9,8 @@ export interface AuthUser {
   id: number;
   name: string;
   email: string;
+  role_name: string;
+  role_display_name: string;
 }
 
 export function login(data: LoginPayload): Promise<{ user: AuthUser; access_token: string }> {

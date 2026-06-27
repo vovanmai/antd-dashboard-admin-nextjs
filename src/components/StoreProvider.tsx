@@ -6,6 +6,7 @@ import { ConfigProvider } from "antd";
 import viVN from "antd/locale/vi_VN";
 import { store } from "@/lib/store/store";
 import type { AppStore } from "@/lib/store/store";
+import AuthInitializer from "@/components/AuthInitializer";
 
 export default function StoreProvider({
   children,
@@ -20,7 +21,7 @@ export default function StoreProvider({
   return (
     <Provider store={storeRef.current}>
       <ConfigProvider locale={viVN}>
-        {children}
+        <AuthInitializer>{children}</AuthInitializer>
       </ConfigProvider>
     </Provider>
   );
