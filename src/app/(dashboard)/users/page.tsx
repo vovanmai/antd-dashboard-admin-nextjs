@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import {
   Card,
   Table,
@@ -13,9 +14,9 @@ import {
   Select,
   Row,
   Col,
-  Popconfirm,
   Tooltip,
-  Statistic,
+  Form,
+  Modal,
   message,
 } from "antd";
 import {
@@ -24,11 +25,11 @@ import {
   EditOutlined,
   DeleteOutlined,
   ExportOutlined,
-  UserOutlined,
-  TeamOutlined,
+  ExclamationCircleFilled,
 } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { usersApi, type User } from "@/lib/api/users";
+import { rolesApi, type Role } from "@/lib/api/roles";
 
 const { Text, Title } = Typography;
 
@@ -37,30 +38,51 @@ const roleColors: Record<string, string> = {
   "Sub Admin": "blue",
 };
 
-export default function UsersPage() {
-  const [searchInput, setSearchInput] = useState("");
-  const [roleInput, setRoleInput] = useState<string | undefined>(undefined);
-  const [search, setSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState<string | undefined>(undefined);
+function UsersPageInner() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const search = searchParams.get("email") ?? "";
+  const roleFilter = searchParams.get("role_id") ?? undefined;
+  const page = Number(searchParams.get("page") ?? "1");
+  const perPage = Number(searchParams.get("per_page") ?? "15");
+
+  const [form] = Form.useForm();
+  const [fetchTrigger, setFetchTrigger] = useState(0);
   const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
   const [data, setData] = useState<User[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
   const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState(15);
   const [loading, setLoading] = useState(false);
 
-  const handleSearch = () => {
-    setSearch(searchInput);
-    setRoleFilter(roleInput);
-    setPage(1);
+  useEffect(() => {
+    rolesApi.getRoles().then(setRoles).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    form.setFieldsValue({ email: search || undefined, role_id: roleFilter ?? null });
+  }, [search, roleFilter, form]);
+
+  const pushParams = useCallback(
+    (updates: Record<string, string | undefined>) => {
+      const params = new URLSearchParams(searchParams.toString());
+      Object.entries(updates).forEach(([k, v]) => {
+        if (v) params.set(k, v);
+        else params.delete(k);
+      });
+      router.replace(`${pathname}?${params.toString()}`);
+    },
+    [router, pathname, searchParams],
+  );
+
+  const handleSearch = (values: { email?: string; role_id?: string }) => {
+    pushParams({ email: values.email || undefined, role_id: values.role_id || undefined, page: "1" });
+    setFetchTrigger((t) => t + 1);
   };
 
   const handleReset = () => {
-    setSearchInput("");
-    setRoleInput(undefined);
-    setSearch("");
-    setRoleFilter(undefined);
-    setPage(1);
+    router.replace(pathname);
   };
 
   const fetchUsers = useCallback(async () => {
@@ -69,8 +91,8 @@ export default function UsersPage() {
       const res = await usersApi.getUsers({
         page,
         per_page: perPage,
-        search: search || undefined,
-        role: roleFilter,
+        email: search || undefined,
+        role_id: roleFilter,
       });
       setData(res.data);
       setTotal(res.meta.total);
@@ -79,14 +101,11 @@ export default function UsersPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, perPage, search, roleFilter]);
+  }, [page, perPage, search, roleFilter, fetchTrigger]);
 
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
-
-  const adminCount = data.filter((u) => u.role === "Admin").length;
-  const subAdminCount = data.filter((u) => u.role === "Sub Admin").length;
 
   const columns: ColumnsType<User> = [
     {
@@ -133,16 +152,34 @@ export default function UsersPage() {
       title: "Hành động",
       key: "actions",
       align: "center",
-      render: () => (
+      render: (_, record) => (
         <Space size={4}>
           <Tooltip title="Chỉnh sửa">
             <Button type="text" icon={<EditOutlined />} size="small" style={{ color: "#6366f1" }} />
           </Tooltip>
-          <Popconfirm title="Bạn có chắc muốn xoá người dùng này?" okText="Xoá" cancelText="Huỷ" okType="danger">
-            <Tooltip title="Xoá">
-              <Button type="text" icon={<DeleteOutlined />} size="small" danger />
-            </Tooltip>
-          </Popconfirm>
+          <Tooltip title="Xoá">
+            <Button
+              type="text"
+              icon={<DeleteOutlined />}
+              size="small"
+              danger
+              onClick={() =>
+                Modal.confirm({
+                  title: "Bạn có chắc muốn xoá người dùng này?",
+                  icon: <ExclamationCircleFilled />,
+                  content: `${record.name} (${record.email})`,
+                  okText: "Xoá",
+                  okType: "danger",
+                  cancelText: "Huỷ",
+                  onOk: () =>
+                    usersApi.deleteUser(record.id).then(() => {
+                      message.success("Xoá người dùng thành công");
+                      setFetchTrigger((t) => t + 1);
+                    }),
+                })
+              }
+            />
+          </Tooltip>
         </Space>
       ),
     },
@@ -152,42 +189,42 @@ export default function UsersPage() {
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       <Card style={{ borderRadius: 12, border: "none", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
         <Title level={5} style={{ margin: "0 0 16px" }}>Tìm kiếm</Title>
-        <Row gutter={[12, 12]} align="middle">
-          <Col xs={24} sm={12} md={8}>
-            <Input
-              placeholder="Tìm kiếm tên, email..."
-              prefix={<SearchOutlined style={{ color: "#bbb" }} />}
-              variant="filled"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              onPressEnter={handleSearch}
-              allowClear
-            />
-          </Col>
-          <Col xs={24} sm={8} md={6}>
-            <Select
-              placeholder="Vai trò"
-              allowClear
-              style={{ width: "100%" }}
-              options={["Admin", "Sub Admin"].map((r) => ({ label: r, value: r }))}
-              onChange={setRoleInput}
-              value={roleInput}
-            />
-          </Col>
-          <Col>
-            <Space>
-              <Button
-                type="primary"
-                icon={<SearchOutlined />}
-                onClick={handleSearch}
-                style={{ background: "#6366f1", borderColor: "#6366f1" }}
-              >
-                Tìm kiếm
-              </Button>
-              <Button onClick={handleReset}>Đặt lại</Button>
-            </Space>
-          </Col>
-        </Row>
+        <Form form={form} onFinish={handleSearch}>
+          <Row gutter={[12, 12]} align="middle">
+            <Col xs={24} sm={12} md={8}>
+              <Form.Item name="email" style={{ margin: 0 }}>
+                <Input
+                  placeholder="Tìm kiếm email..."
+                  prefix={<SearchOutlined style={{ color: "#bbb" }} />}
+                  allowClear
+                />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={8} md={6}>
+              <Form.Item name="role_id" style={{ margin: 0 }}>
+                <Select
+                  placeholder="Vai trò"
+                  allowClear
+                  style={{ width: "100%" }}
+                  options={roles.map((r) => ({ label: r.display_name, value: String(r.id) }))}
+                />
+              </Form.Item>
+            </Col>
+            <Col>
+              <Space>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  icon={<SearchOutlined />}
+                  style={{ background: "#6366f1", borderColor: "#6366f1" }}
+                >
+                  Tìm kiếm
+                </Button>
+                <Button onClick={handleReset}>Đặt lại</Button>
+              </Space>
+            </Col>
+          </Row>
+        </Form>
       </Card>
 
       <Card style={{ borderRadius: 12, border: "none", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
@@ -238,11 +275,10 @@ export default function UsersPage() {
             total,
             showSizeChanger: true,
             pageSizeOptions: ["15", "30", "50"],
-            showTotal: (t) => `Tổng ${t} người dùng`,
+            showTotal: (t) => `Tổng ${t}`,
             style: { marginTop: 16 },
             onChange: (p, ps) => {
-              setPage(p);
-              setPerPage(ps);
+              pushParams({ page: String(p), per_page: String(ps) });
             },
           }}
           rowSelection={{
@@ -255,5 +291,13 @@ export default function UsersPage() {
         />
       </Card>
     </div>
+  );
+}
+
+export default function UsersPage() {
+  return (
+    <Suspense>
+      <UsersPageInner />
+    </Suspense>
   );
 }

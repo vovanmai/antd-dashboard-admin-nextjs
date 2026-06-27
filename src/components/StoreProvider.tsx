@@ -2,6 +2,8 @@
 
 import { useRef } from "react";
 import { Provider } from "react-redux";
+import { ConfigProvider } from "antd";
+import viVN from "antd/locale/vi_VN";
 import { store } from "@/lib/store/store";
 import type { AppStore } from "@/lib/store/store";
 
@@ -15,5 +17,11 @@ export default function StoreProvider({
     storeRef.current = store;
   }
 
-  return <Provider store={storeRef.current}>{children}</Provider>;
+  return (
+    <Provider store={storeRef.current}>
+      <ConfigProvider locale={viVN}>
+        {children}
+      </ConfigProvider>
+    </Provider>
+  );
 }
