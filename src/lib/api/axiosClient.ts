@@ -1,4 +1,6 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
+import { store } from '@/lib/store/store';
+import { setCurrentUser } from '@/lib/store/features/auth/authSlice';
 
 const axiosClient: AxiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -38,10 +40,11 @@ axiosClient.interceptors.response.use(
     const status = error.response && error.response.status
     switch (status) {
       case 401:
-        localStorage.removeItem('access_token')
-        break
-        // toast.error('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.')
-        // window.location.href = '/login/email'
+        localStorage.removeItem('access_token');
+        delete axiosClient.defaults.headers.common['Authorization'];
+        store.dispatch(setCurrentUser(null));
+        window.location.replace('/login');
+        break;
       case 400:
         // toast.error(error.response.data.message)
     }

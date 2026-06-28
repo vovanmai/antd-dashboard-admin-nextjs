@@ -1,9 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Layout } from "antd";
+import { useState, useEffect, useRef, createContext, useContext } from "react";
+import { Layout, message } from "antd";
+import type { MessageInstance } from "antd/es/message/interface";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import { selectJustLoggedIn, setJustLoggedIn } from "@/lib/store/features/auth/authSlice";
+
+const MessageContext = createContext<MessageInstance | null>(null);
+
+export function useMessage() {
+  const ctx = useContext(MessageContext);
+  if (!ctx) throw new Error("useMessage must be used within DashboardLayout");
+  return ctx;
+}
 
 const { Content } = Layout;
 
@@ -12,9 +23,21 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const [messageApi, contextHolder] = message.useMessage();
+  const dispatch = useAppDispatch();
+  const justLoggedIn = useAppSelector(selectJustLoggedIn);
+  const loginMsgShown = useRef(false);
   const [collapsed, setCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    if (justLoggedIn && !loginMsgShown.current) {
+      loginMsgShown.current = true;
+      dispatch(setJustLoggedIn(false));
+      messageApi.open({ type: "success", content: "Đăng nhập thành công!" });
+    }
+  }, [justLoggedIn, dispatch, messageApi]);
 
   useEffect(() => {
     const check = () => {
@@ -40,6 +63,8 @@ export default function DashboardLayout({
   const marginLeft = isMobile ? 0 : collapsed ? 70 : 256;
 
   return (
+    <MessageContext.Provider value={messageApi}>
+      {contextHolder}
     <Layout style={{ minHeight: "100vh" }}>
       <Sidebar
         collapsed={collapsed}
@@ -71,5 +96,6 @@ export default function DashboardLayout({
         </Content>
       </Layout>
     </Layout>
+    </MessageContext.Provider>
   );
 }

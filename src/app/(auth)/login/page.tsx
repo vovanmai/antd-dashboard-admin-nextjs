@@ -7,10 +7,10 @@ import {
   GithubOutlined,
   GoogleOutlined,
 } from "@ant-design/icons";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAppDispatch } from "@/lib/store/hooks";
-import { setCurrentUser } from "@/lib/store/features/auth/authSlice";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import { setCurrentUser, setJustLoggedIn, selectCurrentUser } from "@/lib/store/features/auth/authSlice";
 import { login } from "@/lib/api/auth";
 import { setAuthToken } from "@/lib/api/axiosClient";
 
@@ -20,8 +20,13 @@ export default function LoginPage() {
   const router = useRouter();
   const [form] = Form.useForm();
   const dispatch = useAppDispatch();
+  const currentUser = useAppSelector(selectCurrentUser);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (currentUser) router.replace("/dashboard");
+  }, [currentUser, router]);
 
   const handleLogin = async (values: { email: string; password: string }) => {
     try {
@@ -30,6 +35,7 @@ export default function LoginPage() {
       const { user, access_token } = await login(values);
       setAuthToken(access_token);
       dispatch(setCurrentUser(user));
+      dispatch(setJustLoggedIn(true));
       router.push("/dashboard");
     } catch (err: any) {
       setError(err?.data?.message ?? err?.message ?? 'Đăng nhập thất bại');
