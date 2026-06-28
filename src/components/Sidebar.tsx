@@ -23,6 +23,17 @@ import { setAuthToken } from "@/lib/api/axiosClient";
 const { Sider } = Layout;
 const { Text } = Typography;
 
+const menuKeyMap: Array<{ prefix: string; key: string }> = [
+  { prefix: "/users", key: "/users" },
+  { prefix: "/orders", key: "/orders" },
+  { prefix: "/products", key: "/products" },
+];
+
+function getSelectedKey(pathname: string): string {
+  const match = menuKeyMap.find((m) => pathname.startsWith(m.prefix));
+  return match ? match.key : pathname;
+}
+
 const menuItems: MenuProps["items"] = [
   {
     key: "/dashboard",
@@ -149,7 +160,7 @@ function SidebarContent({
       <div style={{ flex: 1, padding: "12px 0", overflowY: "auto", overflowX: "hidden" }}>
         <Menu
           mode="inline"
-          selectedKeys={[pathname]}
+          selectedKeys={[getSelectedKey(pathname)]}
           openKeys={openKeys}
           onOpenChange={onOpenChange}
           onClick={({ key }) => onMenuClick(key)}
@@ -319,7 +330,7 @@ export default function Sidebar({
           <div style={{ flex: 1, padding: "8px 0", overflowY: "auto" }}>
             <Menu
               mode="inline"
-              selectedKeys={[pathname]}
+              selectedKeys={[getSelectedKey(pathname)]}
               openKeys={openKeys}
               onOpenChange={setOpenKeys}
               onClick={({ key }) => handleMenuClick(key)}

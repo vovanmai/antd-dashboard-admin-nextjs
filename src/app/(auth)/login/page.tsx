@@ -150,12 +150,12 @@ export default function LoginPage() {
             />
           </Form.Item>
 
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 20 }}>
+          {/* <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 20 }}>
             <Checkbox defaultChecked>Ghi nhớ đăng nhập</Checkbox>
             <Button type="link" style={{ padding: 0, color: "#6366f1" }}>
               Quên mật khẩu?
             </Button>
-          </div>
+          </div> */}
 
           <Form.Item style={{ marginBottom: 16 }}>
             <Button
@@ -178,11 +178,11 @@ export default function LoginPage() {
           </Form.Item>
         </Form>
 
-        <Divider style={{ margin: "16px 0" }}>
+        {/* <Divider style={{ margin: "16px 0" }}>
           <Text type="secondary" style={{ fontSize: 12 }}>hoặc đăng nhập bằng</Text>
-        </Divider>
+        </Divider> */}
 
-        <Space style={{ width: "100%", justifyContent: "center" }} size={12}>
+        {/* <Space style={{ width: "100%", justifyContent: "center" }} size={12}>
           <Button
             icon={<GoogleOutlined />}
             size="large"
@@ -206,7 +206,7 @@ export default function LoginPage() {
               Đăng ký ngay
             </Button>
           </Text>
-        </div>
+        </div> */}
       </Card>
     </div>
   );

@@ -269,7 +269,7 @@ function UsersPageInner() {
                   disabled={!perms[PERM_USER_CREATE]}
                   onClick={() => router.push("/users/create")}
                 >
-                  Thêm người dùng
+                  Tạo mới
                 </Button>
               </span>
             </Tooltip>
