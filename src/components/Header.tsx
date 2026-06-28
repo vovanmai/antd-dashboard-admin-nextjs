@@ -27,7 +27,8 @@ import type { MenuProps } from "antd";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAppSelector, useAppDispatch } from "@/lib/store/hooks";
-import { selectCurrentUser, setCurrentUser, setJustLoggedOut } from "@/lib/store/features/auth/authSlice";
+import { selectCurrentUser, setCurrentUser } from "@/lib/store/features/auth/authSlice";
+import globalMessage from "@/lib/message";
 import { authApi } from "@/lib/api/auth";
 import { setAuthToken } from "@/lib/api/axiosClient";
 
@@ -121,7 +122,7 @@ export default function Header({ collapsed, isMobile, onToggle }: HeaderProps) {
       } finally {
         setAuthToken(null);
         dispatch(setCurrentUser(null));
-        dispatch(setJustLoggedOut(true));
+        globalMessage.success("Đăng xuất thành công!");
         router.push("/login");
       }
     }

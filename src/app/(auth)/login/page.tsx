@@ -1,16 +1,15 @@
 "use client";
 
-import { Card, Form, Input, Button, Checkbox, Divider, Typography, Space, Alert, message } from "antd";
+import { Card, Form, Input, Button, Checkbox, Divider, Typography, Space, Alert } from "antd";
 import {
   LockOutlined,
   MailOutlined,
-  GithubOutlined,
-  GoogleOutlined,
 } from "@ant-design/icons";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
-import { setCurrentUser, setJustLoggedIn, selectCurrentUser, selectJustLoggedOut, setJustLoggedOut } from "@/lib/store/features/auth/authSlice";
+import { setCurrentUser, selectCurrentUser } from "@/lib/store/features/auth/authSlice";
+import globalMessage from "@/lib/message";
 import { login } from "@/lib/api/auth";
 import { setAuthToken } from "@/lib/api/axiosClient";
 
@@ -21,21 +20,12 @@ export default function LoginPage() {
   const [form] = Form.useForm();
   const dispatch = useAppDispatch();
   const currentUser = useAppSelector(selectCurrentUser);
-  const justLoggedOut = useAppSelector(selectJustLoggedOut);
-  const [messageApi, contextHolder] = message.useMessage();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (currentUser) router.replace("/dashboard");
   }, [currentUser, router]);
-
-  useEffect(() => {
-    if (justLoggedOut) {
-      messageApi.success("Đăng xuất thành công!");
-      dispatch(setJustLoggedOut(false));
-    }
-  }, [justLoggedOut, messageApi, dispatch]);
 
   const handleLogin = async (values: { email: string; password: string }) => {
     try {
@@ -44,7 +34,7 @@ export default function LoginPage() {
       const { user, access_token } = await login(values);
       setAuthToken(access_token);
       dispatch(setCurrentUser(user));
-      dispatch(setJustLoggedIn(true));
+      globalMessage.success("Đăng nhập thành công!");
       router.push("/dashboard");
     } catch (err: any) {
       setError(err?.data?.message ?? err?.message ?? 'Đăng nhập thất bại');
@@ -54,8 +44,6 @@ export default function LoginPage() {
   };
 
   return (
-    <>
-      {contextHolder}
     <div
       style={{
         minHeight: "100vh",
@@ -226,6 +214,5 @@ export default function LoginPage() {
         </div> */}
       </Card>
     </div>
-    </>
   );
 }
