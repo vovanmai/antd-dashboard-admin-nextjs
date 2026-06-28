@@ -228,7 +228,7 @@ export default function NewProductPage() {
                       size="large"
                       min={0}
                       formatter={(v) => `${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
-                      parser={(v) => Number(v!.replace(/\./g, ""))}
+                      parser={(v) => Number(v!.replace(/\./g, "")) as unknown as 0}
                       placeholder="0"
                       addonAfter="₫"
                     />
@@ -244,7 +244,7 @@ export default function NewProductPage() {
                       size="large"
                       min={0}
                       formatter={(v) => `${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
-                      parser={(v) => Number(v!.replace(/\./g, ""))}
+                      parser={(v) => Number(v!.replace(/\./g, "")) as unknown as 0}
                       placeholder="0"
                       addonAfter="₫"
                     />

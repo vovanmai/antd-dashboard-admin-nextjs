@@ -16,7 +16,7 @@ import {
 import { usePathname, useRouter } from "next/navigation";
 import type { MenuProps } from "antd";
 import { useAppSelector, useAppDispatch } from "@/lib/store/hooks";
-import { selectCurrentUser, setCurrentUser } from "@/lib/store/features/auth/authSlice";
+import { selectCurrentUser, setCurrentUser, setJustLoggedOut } from "@/lib/store/features/auth/authSlice";
 import { authApi } from "@/lib/api/auth";
 import { setAuthToken } from "@/lib/api/axiosClient";
 
@@ -258,6 +258,7 @@ export default function Sidebar({
     } finally {
       setAuthToken(null);
       dispatch(setCurrentUser(null));
+      dispatch(setJustLoggedOut(true));
       router.push("/login");
     }
   };
