@@ -303,7 +303,7 @@ function UsersPageInner() {
             showSizeChanger: true,
             pageSizeOptions: ["15", "30", "50"],
             showTotal: (t) => `Tổng ${t}`,
-            position: ["topRight", "bottomRight"],
+            placement: ["topEnd", "bottomEnd"],
             onChange: (p, ps) => {
               pushParams({ page: String(p), per_page: String(ps) });
             },
