@@ -20,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={inter.className}>
-      <body>
+      <body suppressHydrationWarning>
         <StoreProvider>
           <AntdRegistry>
             <MessageProvider>
