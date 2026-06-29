@@ -235,7 +235,6 @@ function UsersPageInner() {
                   type="primary"
                   htmlType="submit"
                   icon={<SearchOutlined />}
-                  style={{ background: "#6366f1", borderColor: "#6366f1" }}
                 >
                   Tìm kiếm
                 </Button>

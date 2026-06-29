@@ -17,10 +17,13 @@ export default function StoreProvider({
   if (!storeRef.current) {
     storeRef.current = store;
   }
+  const theme = {
+    token: { colorPrimary: '#6366f1' },
+  }
 
   return (
     <Provider store={storeRef.current}>
-      <ConfigProvider locale={viVN}>
+      <ConfigProvider locale={viVN} theme={theme}>
         <AuthInitializer>{children}</AuthInitializer>
       </ConfigProvider>
     </Provider>

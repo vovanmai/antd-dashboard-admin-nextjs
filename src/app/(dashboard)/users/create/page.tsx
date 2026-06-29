@@ -145,7 +145,6 @@ export default function CreateUserPage() {
                 htmlType="submit"
                 icon={<SaveOutlined />}
                 loading={loading}
-                // style={{ background: "#6366f1", borderColor: "#6366f1" }}
               >
                 Lưu
               </Button>
