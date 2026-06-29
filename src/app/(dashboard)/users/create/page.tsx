@@ -10,11 +10,11 @@ import {
   Select,
   Typography,
   Space,
-  message,
 } from "antd";
 import { ArrowLeftOutlined, SaveOutlined } from "@ant-design/icons";
 import { usersApi } from "@/lib/api/users";
 import { rolesApi, type Role } from "@/lib/api/roles";
+import globalMessage from "@/lib/message";
 
 const { Title } = Typography;
 
@@ -38,7 +38,7 @@ export default function CreateUserPage() {
     setLoading(true);
     try {
       await usersApi.createUser(values);
-      message.success("Tạo người dùng thành công");
+      globalMessage.success("Tạo người dùng thành công");
       router.push("/users");
     } catch (err: any) {
       const errors: Record<string, string> | undefined = err?.data?.errors;
@@ -49,8 +49,6 @@ export default function CreateUserPage() {
             errors: [msg],
           })),
         );
-      } else {
-        message.error(err?.data?.message ?? "Tạo người dùng thất bại");
       }
     } finally {
       setLoading(false);

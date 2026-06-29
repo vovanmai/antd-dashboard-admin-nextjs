@@ -11,11 +11,11 @@ import {
   Typography,
   Space,
   Spin,
-  message,
 } from "antd";
 import { ArrowLeftOutlined, SaveOutlined } from "@ant-design/icons";
 import { usersApi } from "@/lib/api/users";
 import { rolesApi, type Role } from "@/lib/api/roles";
+import globalMessage from "@/lib/message";
 
 const { Title } = Typography;
 
@@ -42,7 +42,7 @@ export default function EditUserPage() {
           role_id: user.role_id,
         });
       })
-      .catch(() => message.error("Không thể tải thông tin người dùng"))
+      .catch(() => {})
       .finally(() => setFetching(false));
   }, [id, form]);
 
@@ -56,7 +56,7 @@ export default function EditUserPage() {
     setLoading(true);
     try {
       await usersApi.updateUser(id, values);
-      message.success("Cập nhật người dùng thành công");
+      globalMessage.success("Cập nhật người dùng thành công");
       router.push("/users");
     } catch (err: any) {
       const errors: Record<string, string> | undefined = err?.data?.errors;
@@ -67,8 +67,6 @@ export default function EditUserPage() {
             errors: [msg],
           })),
         );
-      } else {
-        message.error(err?.data?.message ?? "Cập nhật người dùng thất bại");
       }
     } finally {
       setLoading(false);

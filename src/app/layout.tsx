@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import StoreProvider from "@/components/StoreProvider";
 import MessageProvider from "@/components/MessageProvider";
+import RouterProvider from "@/components/RouterProvider";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -22,7 +23,9 @@ export default function RootLayout({
       <body>
         <StoreProvider>
           <AntdRegistry>
-            <MessageProvider>{children}</MessageProvider>
+            <MessageProvider>
+              <RouterProvider>{children}</RouterProvider>
+            </MessageProvider>
           </AntdRegistry>
         </StoreProvider>
       </body>

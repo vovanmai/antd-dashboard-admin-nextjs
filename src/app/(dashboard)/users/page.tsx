@@ -17,7 +17,6 @@ import {
   Tooltip,
   Form,
   Modal,
-  message,
 } from "antd";
 import {
   SearchOutlined,
@@ -30,6 +29,7 @@ import {
 import type { ColumnsType } from "antd/es/table";
 import type { TooltipProps } from "antd";
 import { usersApi, type User } from "@/lib/api/users";
+import globalMessage from "@/lib/message";
 import { rolesApi, type Role } from "@/lib/api/roles";
 import { usePermissions } from "@/hooks/usePermission";
 import { PERM_USER_CREATE, PERM_USER_EDIT, PERM_USER_DELETE } from "@/constants/permissions";
@@ -106,7 +106,6 @@ function UsersPageInner() {
       setData(res.data);
       setTotal(res.meta.total);
     } catch {
-      message.error("Không thể tải danh sách người dùng");
     } finally {
       setLoading(false);
     }
@@ -192,7 +191,7 @@ function UsersPageInner() {
                     cancelText: "Huỷ",
                     onOk: () =>
                       usersApi.deleteUser(record.id).then(() => {
-                        message.success("Xoá người dùng thành công");
+                        globalMessage.success("Xoá người dùng thành công");
                         setFetchTrigger((t) => t + 1);
                       }),
                   })

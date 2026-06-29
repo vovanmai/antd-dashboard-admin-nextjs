@@ -1,6 +1,8 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
 import { store } from '@/lib/store/store';
 import { setCurrentUser } from '@/lib/store/features/auth/authSlice';
+import globalMessage from '@/lib/message';
+import globalRouter from '@/lib/router';
 
 const axiosClient: AxiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -43,7 +45,8 @@ axiosClient.interceptors.response.use(
         localStorage.removeItem('access_token');
         delete axiosClient.defaults.headers.common['Authorization'];
         store.dispatch(setCurrentUser(null));
-        window.location.replace('/login');
+        globalMessage.error('Phiên đăng nhập hết hạn.');
+        globalRouter.replace('/login');
         break;
       case 400:
         // toast.error(error.response.data.message)
