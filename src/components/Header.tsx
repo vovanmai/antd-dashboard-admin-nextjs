@@ -26,11 +26,11 @@ import {
 import type { MenuProps } from "antd";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { useAppSelector, useAppDispatch } from "@/lib/store/hooks";
-import { selectCurrentUser, setCurrentUser } from "@/lib/store/features/auth/authSlice";
+import { useAppSelector, useAppDispatch } from "@/store/hooks";
+import { selectCurrentUser, setCurrentUser } from "@/store/features/auth/authSlice";
 import globalMessage from "@/lib/message";
-import { authApi } from "@/lib/api/auth";
-import { setAuthToken } from "@/lib/api/axiosClient";
+import { authApi } from "@/api/auth";
+import { setAuthToken } from "@/api/axiosClient";
 
 const { Header: AntHeader } = Layout;
 const { Text } = Typography;

@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
-import { store } from '@/lib/store/store';
-import { setCurrentUser } from '@/lib/store/features/auth/authSlice';
+import { store } from '@/store/store';
+import { setCurrentUser } from '@/store/features/auth/authSlice';
 import globalMessage from '@/lib/message';
 import globalRouter from '@/lib/router';
 

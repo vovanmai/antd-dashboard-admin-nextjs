@@ -15,11 +15,11 @@ import {
 } from "@ant-design/icons";
 import { usePathname, useRouter } from "next/navigation";
 import type { MenuProps } from "antd";
-import { useAppSelector, useAppDispatch } from "@/lib/store/hooks";
-import { selectCurrentUser, setCurrentUser } from "@/lib/store/features/auth/authSlice";
+import { useAppSelector, useAppDispatch } from "@/store/hooks";
+import { selectCurrentUser, setCurrentUser } from "@/store/features/auth/authSlice";
 import globalMessage from "@/lib/message";
-import { authApi } from "@/lib/api/auth";
-import { setAuthToken } from "@/lib/api/axiosClient";
+import { authApi } from "@/api/auth";
+import { setAuthToken } from "@/api/axiosClient";
 
 const { Sider } = Layout;
 const { Text } = Typography;

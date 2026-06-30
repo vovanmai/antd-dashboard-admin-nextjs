@@ -1,4 +1,4 @@
-import api from '@/lib/api/axiosClient';
+import api from '@/api/axiosClient';
 
 export interface User {
   id: number;

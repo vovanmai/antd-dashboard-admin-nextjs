@@ -28,9 +28,9 @@ import {
 } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import type { TooltipProps } from "antd";
-import { usersApi, type User } from "@/lib/api/users";
+import { usersApi, type User } from "@/api/users";
 import globalMessage from "@/lib/message";
-import { rolesApi, type Role } from "@/lib/api/roles";
+import { rolesApi, type Role } from "@/api/roles";
 import { usePermissions } from "@/hooks/usePermission";
 import { PERM_USER_CREATE, PERM_USER_EDIT, PERM_USER_DELETE } from "@/constants/permissions";
 

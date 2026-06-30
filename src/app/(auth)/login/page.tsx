@@ -7,11 +7,11 @@ import {
 } from "@ant-design/icons";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
-import { setCurrentUser, selectCurrentUser } from "@/lib/store/features/auth/authSlice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { setCurrentUser, selectCurrentUser } from "@/store/features/auth/authSlice";
 import globalMessage from "@/lib/message";
-import { login } from "@/lib/api/auth";
-import { setAuthToken } from "@/lib/api/axiosClient";
+import { login } from "@/api/auth";
+import { setAuthToken } from "@/api/axiosClient";
 
 const { Text, Title } = Typography;
 

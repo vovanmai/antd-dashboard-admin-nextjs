@@ -13,8 +13,8 @@ import {
   Spin,
 } from "antd";
 import { ArrowLeftOutlined, SaveOutlined } from "@ant-design/icons";
-import { usersApi } from "@/lib/api/users";
-import { rolesApi, type Role } from "@/lib/api/roles";
+import { usersApi } from "@/api/users";
+import { rolesApi, type Role } from "@/api/roles";
 import globalMessage from "@/lib/message";
 
 const { Title } = Typography;

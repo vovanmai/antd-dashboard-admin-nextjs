@@ -1,5 +1,5 @@
-import { useAppSelector } from "@/lib/store/hooks";
-import { selectCurrentUser } from "@/lib/store/features/auth/authSlice";
+import { useAppSelector } from "@/store/hooks";
+import { selectCurrentUser } from "@/store/features/auth/authSlice";
 
 export function usePermission(permission: string): boolean {
   const currentUser = useAppSelector(selectCurrentUser);

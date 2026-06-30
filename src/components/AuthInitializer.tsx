@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
-import { useAppDispatch } from "@/lib/store/hooks";
-import { setCurrentUser } from "@/lib/store/features/auth/authSlice";
-import { authApi } from "@/lib/api/auth";
-import { setAuthToken } from "@/lib/api/axiosClient";
+import { useAppDispatch } from "@/store/hooks";
+import { setCurrentUser } from "@/store/features/auth/authSlice";
+import { authApi } from "@/api/auth";
+import { setAuthToken } from "@/api/axiosClient";
 
 export default function AuthInitializer({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch();

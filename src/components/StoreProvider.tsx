@@ -1,12 +1,22 @@
 "use client";
 
 import { useRef } from "react";
-import { Provider } from "react-redux";
+import { Provider, useSelector } from "react-redux";
 import { ConfigProvider } from "antd";
 import viVN from "antd/locale/vi_VN";
-import { store } from "@/lib/store/store";
-import type { AppStore } from "@/lib/store/store";
+import { store } from "@/store/store";
+import type { AppStore } from "@/store/store";
 import AuthInitializer from "@/components/AuthInitializer";
+import { selectTheme } from "@/store/features/app/appSlice";
+
+function ThemedApp({ children }: { children: React.ReactNode }) {
+  const theme = useSelector(selectTheme);
+  return (
+    <ConfigProvider locale={viVN} theme={theme}>
+      <AuthInitializer>{children}</AuthInitializer>
+    </ConfigProvider>
+  );
+}
 
 export default function StoreProvider({
   children,
@@ -17,15 +27,10 @@ export default function StoreProvider({
   if (!storeRef.current) {
     storeRef.current = store;
   }
-  const theme = {
-    token: { colorPrimary: '#6366f1' },
-  }
 
   return (
     <Provider store={storeRef.current}>
-      <ConfigProvider locale={viVN} theme={theme}>
-        <AuthInitializer>{children}</AuthInitializer>
-      </ConfigProvider>
+      <ThemedApp>{children}</ThemedApp>
     </Provider>
   );
 }
